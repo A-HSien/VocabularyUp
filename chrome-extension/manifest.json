@@ -1,5 +1,5 @@
 {
-    "name": "Learn english anytime",
+    "name": "VocabularyUp",
     "version": "1.0",
     "description": "Build an Extension!",
     "permissions": [
@@ -29,21 +29,18 @@
             ],
             "css": [],
             "js": [
-                "content.bundle.js"
+                "cambridgeSite.js"
             ]
         },
         {
             "matches": [
-                "http://localhost:3000/*"
+                "https://*/*"
             ],
             "css": [],
             "js": [
-                "content.bundle.js"
+                "generalSite.js"
             ]
         }
-    ],
-    "web_accessible_resources": [
-        "content/*.js"
     ],
     "icons": {
         "16": "icon/get_started16.png",

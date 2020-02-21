@@ -22,7 +22,7 @@ export function App() {
   const [wordList, setWordList] = React.useState([] as Word[]);
 
 
-  //  const vocabulary = useSelector((state: State) => state.vocabulary);
+  // const vocabulary = useSelector((state: State) => state.vocabulary);
   // const dispatch = useDispatch();
 
   const wordListSaved = () => {
@@ -30,7 +30,7 @@ export function App() {
     const wordList: Word[] = data ? JSON.parse(data) : [];
 
     setWordList(wordList);
-    //  dispatch(queryWord(wordList)); 
+    // dispatch(queryWord(wordList)); 
   };
 
   const classes = useStyles();
@@ -60,6 +60,7 @@ export function App() {
 
   return (
     <Container maxWidth="sm">
+      UP UP your vocabulary
       <button id="wordListSaved" onClick={wordListSaved}></button>
       {wordListEles}
       {/*   <input onInput={search}

@@ -12,7 +12,7 @@ import * as syncStorage from './syncStorage';
         const all = await syncStorage.getAllAsync();
         const array = Object.keys(all).map(key => all[key]);
         sessionStorage.setItem('wordList', JSON.stringify(array));
-        document.getElementById('wordListSaved').click();
+        document.getElementById('wordListSaved')?.click();
     }
 })();
 
