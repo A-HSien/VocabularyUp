@@ -1,21 +1,23 @@
 import { fromEvent } from 'rxjs';
-import { map, filter, tap } from 'rxjs/operators'
+import { map, filter, pairwise, throttleTime } from 'rxjs/operators'
+import { parsedMark, toLookupMark, parseContent, modifyContent } from './ContentPaser';
+import { getToolbox } from './Toolbox';
+
+
 
 
 const skipTags = new Set([
     '#document',
     'HTML'
 ]);
-const parsedMark = `parsed-${Date.now()}`;
+const event = fromEvent(document, 'mousemove')
+    .pipe(map(event => event.target as HTMLElement));
 
-
-fromEvent(document, 'mousemove')
-    .pipe(
-        map(event => event.target as HTMLElement),
-        filter(ele => !skipTags.has(ele.tagName)),
-        filter(ele => !ele.classList.contains(parsedMark)),
-        filter(ele => Array.from(ele.childNodes).some(node => node.nodeName === '#text'))
-    )
+event.pipe(
+    filter(ele => !skipTags.has(ele.tagName)),
+    filter(ele => !ele.classList.contains(parsedMark)),
+    filter(ele => Array.from(ele.childNodes).some(node => node.nodeName === '#text'))
+)
     .subscribe(ele => {
         const result = parseContent(ele);
         ele.classList.add(parsedMark);
@@ -31,76 +33,38 @@ fromEvent(document, 'mousemove')
     });
 
 
-const startTag = `<font class="${parsedMark} ">`;
-const endTag = `</font>`;
-const regex = /[a-zA-Z]/;
+const dictionaryHref = 'https://dictionary.cambridge.org/zht/%E8%A9%9E%E5%85%B8/%E8%8B%B1%E8%AA%9E-%E6%BC%A2%E8%AA%9E-%E7%B9%81%E9%AB%94';
+event.pipe(
+    filter(ele => ele.classList.contains(toLookupMark)),
+    pairwise(),
+    filter(([a, b]) => {
+        return !a ||
+            a.innerText === b.innerText ||
+            getToolbox().style.display === 'none'
+    }),
+    map(([a, b]) => b)
+)
+    .subscribe(ele => {
+        const toolbox = getToolbox();
+        toolbox.style.display = 'block';
+        const rect = ele.getBoundingClientRect();
+        const span = toolbox.querySelector('span');
+        if (span) span.innerHTML = ele.innerText;
+        const a = toolbox.querySelector('a');
+        if (a) a.href = `javascript:window.open('${dictionaryHref}/${ele.innerText}', '_blank', 'toolbar=no,location=no,menubar=no,status=no')`;
 
-const modifyContent = function (org_content: string) {
-    let content = org_content;
-    let end = -1;
+        const top = rect.top - toolbox.offsetHeight;
+        toolbox.style.top = `${top}px`;
+        const left = rect.left;
+        toolbox.style.left = `${left}px`;
+    });
 
-    for (let i = content.length - 1; i >= 0; i--) {
-        const char = content[i];
-        if (regex.test(char)) {
-            if (end < 0) {
-                end = i;
-            }
-        }
-        else if (end >= 0) {
-            if ((content[i] !== '&' && content[end + 1] !== ';')) {
-                content = content.substring(0, end + 1) + endTag + content.substring(end + 1);
-                content = content.substring(0, i + 1) + startTag + content.substring(i + 1);
-            }
-            end = -1;
-        }
-        if (i === 0 && end > 0)
-            content = startTag + content;
-    }
-    return content;
-};
-/* debugger;
-modifyContent('國國國aaa國國國');
-modifyContent('aaa國國國aaa國國國aaa');
-modifyContent('aaa 國國國 aaa 國國國 aaa'); */
-modifyContent('&gt;國國國aaa國國國');
-modifyContent('國國國aaa國&gt;國國');
 
-function parseContent(ele: HTMLElement) {
-    const result = [] as { start: number, end: number }[];
-    if (ele.childElementCount === 0) {
-        result.push({ start: 0, end: ele.innerText.length });
-        return result;
-    }
-
-    let pos = 0;
-    let parsedChildCount = 0;
-    let residual = ele.innerHTML;
-
-    // start parse
-    while (residual.length !== 0) {
-        const tagStartIndex = residual.search(/<[a-z]/);
-
-        if (tagStartIndex === 0) { //start with tag
-            const node = ele.childNodes[parsedChildCount] as HTMLElement;
-            if (!node) throw 'parse error';
-
-            const len = node.outerHTML.length;
-            pos += len;
-            residual = residual.substring(len);
-            parsedChildCount++;
-        }
-        else if (tagStartIndex > 0) { // start with text
-            result.push({ start: pos, end: pos + tagStartIndex });
-            pos += tagStartIndex;
-            residual = residual.substring(tagStartIndex);
-            parsedChildCount++;
-        }
-        else { // only text
-            result.push({ start: pos, end: pos + residual.length });
-            break;
-        }
-    }
-
-    console.log(result);
-    return result;
-};
+fromEvent(window, 'scroll')
+    .pipe(
+        throttleTime(200)
+    )
+    .subscribe(() => {
+        const toolbox = getToolbox();
+        toolbox.style.display = 'none';
+    });

@@ -3,9 +3,8 @@
     "version": "1.0",
     "description": "Build an Extension!",
     "permissions": [
-        "activeTab",
-        "declarativeContent",
-        "storage"
+        "storage",
+        "tabs"
     ],
     "background": {
         "scripts": [
@@ -13,7 +12,7 @@
         ],
         "persistent": false
     },
-    "page_action": {
+    "browser_action": {
         "default_popup": "popup.html",
         "default_icon": {
             "16": "icon/get_started16.png",
@@ -34,9 +33,12 @@
         },
         {
             "matches": [
-                "https://*/*"
+                "https://*/*",
+                "http://*/*"
             ],
-            "css": [],
+            "css": [
+                "fontello/css/fontello-embedded.css"
+            ],
             "js": [
                 "generalSite.js"
             ]

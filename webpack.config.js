@@ -29,7 +29,7 @@ module.exports = {
         use: 'awesome-typescript-loader?{configFileName: "tsconfig.json"}',
       },
       {
-        test: /\.scss$/,
+        test: /\.(sa|sc|c)ss$/,
         use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
       },
     ],
