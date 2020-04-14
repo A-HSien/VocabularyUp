@@ -2,7 +2,7 @@
 import { parseCambridgePage } from './parseCambridgePage';
 import * as syncStorage from './syncStorage';
 
-debugger;
+
 (async function main() { 
     if (location.host.includes('dictionary.cambridge.org')) {
         const toAdd = parseCambridgePage();
